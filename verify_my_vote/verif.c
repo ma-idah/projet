@@ -1,3 +1,17 @@
+/**
+ * \file verif.c
+ * \brief A partir du **NOM Prénom** et de la **clé privée** de l'utilisateur,
+ *        cherche dans le **fichier spécifié** la ligne correspondant au hash des infos
+ *        de l'utilisateur, et affiche le classement qu'il a effectué ainsi que le numéro
+ *        de la ligne.\n 
+ *        Si le vote n'est pas trouvé, le programme renvoie un message d'erreur.
+ * \author Groupe 10
+ * \version 1.0
+ * \date 29/10/2023
+ * 
+*/
+
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
