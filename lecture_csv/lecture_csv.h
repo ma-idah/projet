@@ -3,7 +3,7 @@
 
 #define MAX_ROWS 500
 #define MAX_COLUMNS 50
-#define MAX_STRING_SIZE 100
+#define MAX_STRING_SIZE 200
 
 
 
