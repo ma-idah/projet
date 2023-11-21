@@ -127,7 +127,7 @@ void *circListPrint_int(CircList *cl) {
     ListElement *cur = cl->head;
     for (int i=0; i<cl->size; i++) {
 
-        printf("| %d ", (int)&(cur->value));
+        printf("| %d ", &(cur->value));
         cur = cur->next;
     }
     printf("|\n");
