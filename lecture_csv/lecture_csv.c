@@ -82,6 +82,8 @@ int createFillMatrix(CsvMatrix *mat, const char *fileName) {
 
     fclose(f);
 
+    mat->nbRows--; //ATTENTION: c'est un fix temporaire pour le problème de la ligne en trop, c pas du tout sécurisé car si on un fichier sans ligne vide à la fin on perd une ligne
+
     return 0;
 }
 
@@ -121,5 +123,8 @@ int main(int argc, char const *argv[])
 //                Du coup un fix possible ça serait de faire -1 aux nombres de rows quand on les compte pour
 //                passer le total à la struct, mais ça voudrait dire que si le fichier n'a pas de derniere ligne
 //                vide ça casse tout :/
+
+//      NOTE: fix temporaire ajouté ligne 85, ça marche qu'avec les fichiers qui ont une ligne vide en tant que dernière du coup
+
 
 //TODO Nettoyer printf de debug, commentaires doxygen, supprimer main, faire .h
