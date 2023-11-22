@@ -4,11 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef struct s_CsvMatrix {
-    char matrix[MAX_ROWS][MAX_COLUMNS][MAX_STRING_SIZE];
-    int nbRows;
-    int nbCols;
-} CsvMatrix;
+
 
 CsvMatrix *initCsvMatrix(unsigned int nbRows, unsigned int nbCols) {
     CsvMatrix *mat = malloc(sizeof(CsvMatrix));
@@ -55,7 +51,7 @@ void CsvRowsColsCounter(unsigned int *rows, unsigned int *cols, const char *file
     printf("rows: %d colums: %d\n\n", *rows, *cols);
 }
 
-int createFillMatrix(CsvMatrix *mat, const char *fileName) {
+int FillMatrix(CsvMatrix *mat, const char *fileName) {
     FILE* f = fopen(fileName, "r");
     if (f == NULL) { //gestion d'erreur
         perror("Erreur lors de l'ouverture du fichier\n");
@@ -96,7 +92,7 @@ void printMatrix(const CsvMatrix *mat) {
     }
 }
 
-int main(int argc, char const *argv[])
+/*int main(int argc, char const *argv[])
 {
     // Test arguments valides
     if (argc != 2) {
@@ -111,10 +107,10 @@ int main(int argc, char const *argv[])
     CsvRowsColsCounter(&rows, &cols, fileName);
 
     CsvMatrix *mat = initCsvMatrix((unsigned int)rows, (unsigned int)cols);
-    int a = createFillMatrix(mat, fileName);
+    int a = FillMatrix(mat, fileName);
     printMatrix(mat);
     return 0;
-}
+}*/
 
 //TODO PAS FINI - marche avec les fichiers qui n'ont pas une ligne vide en tant que dernière ligne
 //                quand le programme lit cette dernière ligne vide, fgets ne retourne pas une string vide 
