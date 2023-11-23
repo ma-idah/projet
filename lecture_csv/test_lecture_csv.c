@@ -21,5 +21,6 @@ int main(int argc, char const *argv[])
     CsvMatrix *mat = initCsvMatrix((unsigned int)rows, (unsigned int)cols);
     int a = FillMatrix(mat, fileName);
     printMatrix(mat);
+    printf("ohe\n");
     return 0;
 }
