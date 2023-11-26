@@ -1,4 +1,6 @@
-#include "../lecture_csv/lecture_csv.h"
+// uninominal.c
+
+#include "lecture_csv.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,9 +39,9 @@ int trouverColonneMin(const int sommeColonnes[], int taille) {
     return indiceMin + 4;  // Ajouter 4 pour obtenir le numéro réel de la colonne
 }
 
-void afficher_vainqueur(const CsvMatrix* matrice, int sommeColonnes[]) {
+void afficher_vainqueur(CsvMatrix* matrice, int sommeColonnes[]) {
     calculerSommecolonnes(matrice, sommeColonnes);
     int colMin = trouverColonneMin(sommeColonnes, matrice->nbCols - 4);
-    printf("colMin : %d\n", colMin);
+    //printf("colMin : %d\n", colMin);
     printf("Le vainqueur est %s\n", matrice->matrix[0][colMin]);
 }
