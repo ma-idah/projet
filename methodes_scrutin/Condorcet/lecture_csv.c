@@ -92,3 +92,8 @@ void printMatrix(const CsvMatrix *mat) {
         printf("\n");
     }
 }
+
+void deleteMatrix(CsvMatrix *mat) {
+    free(mat);
+    mat = NULL;
+}
