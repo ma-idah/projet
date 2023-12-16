@@ -18,7 +18,11 @@ int main(int argc, char const *argv[])
     CsvRowsColsCounter(&rows, &cols, file);
     CsvMatrix *mat = initCsvMatrix(rows, cols);
     FillMatrix(mat, file);
-    //printMatrix(mat);
+    
+    
+    DualMatrix *dualMat = initDualMatrix(mat->nbCols-4);
+    fillDualMatrix(mat, dualMat);
+    printDualMatrix(dualMat);
 
     //CONDORCET BASE
     computeCondorcetWinner(mat);

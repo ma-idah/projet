@@ -1,7 +1,7 @@
 #ifndef UNINOMINAL_H
 #define UNINOMINAL_H
 
-#include "lecture_csv.h"
+#include "../../lecture_csv/lecture_csv.h"
 
 // Déclaration des fonctions
 

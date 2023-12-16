@@ -1,6 +1,6 @@
 // uninominal.c
 
-#include "lecture_csv.h"
+#include "../../lecture_csv/lecture_csv.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

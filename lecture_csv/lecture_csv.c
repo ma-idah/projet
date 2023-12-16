@@ -6,12 +6,7 @@
 
 
 
-CsvMatrix *initCsvMatrix(unsigned int nbRows, unsigned int nbCols) {
-    CsvMatrix *mat = malloc(sizeof(CsvMatrix));
-    mat->nbCols = nbCols;
-    mat->nbRows = nbRows;
-    return mat;
-}
+
 
 void CsvRowsColsCounter(unsigned int *rows, unsigned int *cols, const char *fileName) {
     FILE* f = fopen(fileName, "r");
@@ -81,19 +76,12 @@ int FillMatrix(CsvMatrix *mat, const char *fileName) {
 
     fclose(f);
 
+    for (int i=0; i<mat->nbRows; i++) { //on enlève le saut de ligne pour les chaînes de la dernière colonne
+        mat->matrix[i][mat->nbCols-1][strlen(mat->matrix[i][mat->nbCols-1])-1] = '\0';
+    }
+
     return 0;
 }
 
-void printMatrix(const CsvMatrix *mat) {
-    for (int i=0; i<mat->nbRows; i++) {
-        for (int j=0; j<mat->nbCols; j++) {
-            printf("| %s ", mat->matrix[i][j]);
-        }
-        printf("\n");
-    }
-}
 
-void deleteMatrix(CsvMatrix *mat) {
-    free(mat);
-    mat = NULL;
-}
+

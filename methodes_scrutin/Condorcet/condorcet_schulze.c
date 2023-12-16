@@ -1,138 +1,168 @@
-#include "../lecture_csv.h"
+#include "../../lecture_csv/lecture_csv.h"
 #include "condorcet_base.h"
+#include "condorcet_schulze.h"
+#include "../../utils_sd/utils_sd.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#define MAX_CANDIDATES 46 //MAX_COLUMNS - 4 
-typedef struct s_OrientedArrow {
-    int fromIndex;
-    //char fromName[MAX_STRING_SIZE]; //on peut retrouver le nom des candidats avec le tableau nodes
-    int toIndex;
-    //char toName[MAX_STRING_SIZE];
-    int weighting;
-} OrientedArrow;
 
-typedef struct s_DualGraph {
-    char nodes[MAX_CANDIDATES][MAX_STRING_SIZE];
-    int nb_nodes;
-    struct s_OrientedArrow *arrows[MAX_CANDIDATES * (MAX_CANDIDATES-1) / 2];
-    int nb_arrows;
-} DualGraph;
+//Heuristique du chemin gagnant
 
+void findStrongestPath(DynNode* cur, DynNode* dest, int* maxMinWeight, int currentWeight, FILE *logfp) {
+    cur->visited = 1;
+    fprintf(logfp, "[FINDPATH] On visite le noeud %s\n", cur->id);
 
+    // Parcours des arcs du nœud actuel
+    for (unsigned int i = 0; i < cur->arrowsNb; ++i) {
+        DynArrow* arr = cur->arrowsTab[i];
 
-/*void GetCandidatesNameTab(CsvMatrix *mat, char **tab) {
-    for (int i=4; i<mat->nbCols; i++) {
-        strncpy(tab[i-4], mat->matrix[0][i], MAX_STRING_SIZE - 1);
-    }
-}*/
-
-void GetCandidatesNameTab(CsvMatrix *mat, char **tab) {
-    for (int i = 0; i < mat->nbCols - 4; i++) {
-        tab[i] = malloc(MAX_STRING_SIZE * sizeof(char));
-        if (tab[i] == NULL) {
-            perror("Problème malloc pour tab[i]");
-            exit(1);
+        if (!(arr->to->visited)) {
+            int newWeight = arr->weight < currentWeight ? arr->weight : currentWeight;
+            fprintf(logfp, "[FINDPATH]\tnoeud: %s | newWeight : %d\n", arr->to->id, newWeight);
+            if (arr->to == dest) {
+                if (newWeight > *maxMinWeight) {
+                    *maxMinWeight = newWeight;
+                }
+            } else {
+                findStrongestPath(arr->to, dest, maxMinWeight, newWeight, logfp);
+            }
         }
-        strncpy(tab[i], mat->matrix[0][i + 4], MAX_STRING_SIZE);
     }
+
+    cur->visited = 0;
 }
 
-DualGraph *initDualGraph() {
-    DualGraph *graph = malloc(sizeof(DualGraph));
-    if (graph == NULL) {
-        perror("Problème malloc");
-        exit(1);
-    }
-    graph->nb_nodes = 0;
-    graph->nb_arrows = 0;
-    return graph;
-}
+void fillPathMatrix(DynGraph *g, DualMatrix *pathMat, FILE *logfp) {
+    //pathMat : réutilisation du type dualMatrix mais ce n'est pas une matrice de duels
+    //pathMat.matrix doit être vide et pathMat doit être init puis son tableau des noms rempli avec fillOnlyNamesDualMat()
 
-void AddAllCandidatesDGraph(char **tabCandidates, int nb_candidates, DualGraph *graph) {
-    graph->nb_nodes = 0;
-    for (int i=0; i<nb_candidates; i++) {
-        strncpy(graph->nodes[i], tabCandidates[i], MAX_STRING_SIZE);
-        graph->nb_nodes++;
-    }
-}
-
-void AddArrowDGraph(int CandIndex1, int CandIndex2, int score, DualGraph *graph) {
-    //les indexs de candidats donnés doivent être ceux correspondant au tableau donné à graph
-    OrientedArrow *arc = malloc(sizeof(OrientedArrow));
-    if (score == 0) { //si score == 0, pas besoin d'arc
-        free(arc);
-        return;
-    } else if (score > 0) {
-        arc->fromIndex = CandIndex1;
-        arc->toIndex = CandIndex2;
-    } else { //si score négatif, c'est candidat 2 qui a gagné le duel
-        arc->fromIndex = CandIndex2;
-        arc->toIndex = CandIndex1;
-        score = abs(score);
-    }
-    arc->weighting = score;
-    graph->arrows[graph->nb_arrows] = arc;
+    int maxMinWeight = 0;
+    DynNode *depart;
+    DynNode *dest;
     
+    
+
+    //remplir strgstPathMat
+    for (int i = 0; i<g->nodesNb; i++) {
+        for (int j = 0; j<g->nodesNb; j++) {
+            if (i != j) {
+                maxMinWeight = 0;
+                DynNode *depart = g->nodesTab[i];
+                DynNode *dest = g->nodesTab[j];
+
+                fprintf(logfp, "[FILLPATHMATRIX] Recherche du plus gros maillon faible du chemin %s ---> %s", depart->id, dest->id);
+                findStrongestPath(depart, dest, &maxMinWeight, 50, logfp);
+
+                fprintf(logfp, "[FILLPATHMATRIX] Plus gros maillon faible du chemin %s ---> %s:", depart->id, dest->id);
+                fprintf(logfp, " %d\n\n", maxMinWeight);
+
+                pathMat->matrix[i][j] = maxMinWeight;
+            }
+        }
+    }
 }
 
-void printDGArrow(OrientedArrow *arr, char **namesTab) {
-    printf("\t(%s) ---%d--> (%s)", namesTab[arr->fromIndex], arr->weighting, namesTab[arr->fromIndex]);
+//renvoie le nombre de gagnants
+int computeSchulzeWinner(DynGraph *g, char **winners, DualMatrix *pathMat, FILE *logfp) { 
+    //pathMat : réutilisation du type dualMatrix mais ce n'est pas une matrice de duels
+    //pathMat.matrix doit être vide et strgstPathMat doit être init puis son tableau des noms rempli avec fillOnlyNamesDualMat()
+
+    int nbWinners = 0;
+
+    
+    
+    fillPathMatrix(g, pathMat, logfp);
+
+    for (int i=0; i<pathMat->nbRows; i++) {
+        int currentIsWinning = 1; //booléen pour vérifier si le candidat 1 est gagnant potentiel
+        for (int j=0; j<pathMat->nbCols; j++) {
+            if (i != j) {
+                if (pathMat->matrix[i][j] < pathMat->matrix[j][i]) {
+                    currentIsWinning = 0;
+                    //printf("%s: perdant\n", pathMat->namesTab[i]);
+                }
+            }
+        }
+        if (currentIsWinning) {
+            strncpy(winners[nbWinners], pathMat->namesTab[i], MAX_STRING_SIZE);
+            //printf("gagnant : %s\n", winners[nbWinners]);
+            nbWinners++;
+        }
+    }
+    
+    
+
+    return nbWinners;
+
 }
 
-void deleteDualGraph(DualGraph *graph) {
-    //delete toutes les s_orientedArrows du tableau arrows avant 
-    free(graph);
-    graph = NULL;
-}
 
+void condorcetSchulzeMethod(char *file, FILE *logfp) {
 
-
-
-//TODO VERIFIER QUE CA MARCHE BIEN
-int main(int argc, char const *argv[])
-{
-
-    char file[MAX_STRING_SIZE];
-    strncpy(file, argv[1], MAX_STRING_SIZE);
+    //matrice CSV
     int rows, cols;
     CsvRowsColsCounter(&rows, &cols, file);
     CsvMatrix *mat = initCsvMatrix(rows, cols);
     FillMatrix(mat, file);
-    //printMatrix(mat);
 
-    //CONDORCET BASE
+    //CONDORCET SIMPLE
+
+    //Matrice de duels
     DualMatrix *dualMat = initDualMatrix(cols-4);
     fillDualMatrix(mat, dualMat);
-    printDualMatrix(dualMat);
 
     int vainqueur = DualMatrixWinner(dualMat);
     if (vainqueur != -1) {
-        printf("vainqueur : n°%d", vainqueur);
-    } else {
+        fprintf(logfp, "[CONDORCET SIMPLE] Vainqueur de Condoret (avant schulze) : %s\n", dualMat->namesTab[vainqueur]);
+    }
+    fprintf(logfp, "\n");
 
+    //SCHULZE
+
+    //Graph dynamique
+    DynGraph *g = initDynGraph();
+    addAllNodesAndArrowsDynGraph(g, dualMat);
+    fprintf(logfp, "Graphe de duels : \n\n");
+    printDynGraph(g);
+    fprintf(logfp, "\n");
+
+    //CHEMIN GAGNANT
+    DualMatrix *pathMat = initDualMatrix(cols-4);
+    fillOnlyNamesDualMat(pathMat, mat);
+
+    char *winners[g->nodesNb];
+    int nbWinners;
+    for (int i=0; i<g->nodesNb; i++) {
+        winners[i] = (char *)malloc(MAX_STRING_SIZE * sizeof(char));
+    }
+
+    nbWinners = computeSchulzeWinner(g, winners, pathMat, logfp);
+
+    fprintf(logfp, "\nMatrice des chemins les plus forts: \n");
+    printDualMatrix(pathMat);
+
+    //AFFICHAGE GAGNANT(S)
+    fprintf(logfp, "\nGagnants : ");
+    if (winners[0] != NULL) {printf("%s", winners[0]); }
+    for (int i=1; i<nbWinners; i++) {
+        fprintf(logfp, ", %s",winners[i]);
+    }
+    fprintf(logfp, "\n\n");
+
+    //CLEANUP
+    deleteDualMatrix(dualMat);
+    deleteDualMatrix(pathMat);
+    deleteMatrix(mat);
+    deleteDynGraph(g);
+    for (int i=0; i<g->nodesNb; i++) {
+        free(winners[i]);
     }
     
 
-    //CONDORCET SCHULZE
-    
-    //printf("\n\n %d\n", dualMat->matrix[1][0]);
-    DualGraph *graph = initDualGraph();
-
-    char **namesTab = malloc( 2 * (mat->nbCols-4) * MAX_STRING_SIZE * sizeof(char));
-    //SEGFAULT ICI ON VERRA DEMAIN
-    //GetCandidatesNameTab(mat, namesTab); //pas oublier de free chaque case du tab
-    //AddAllCandidatesDGraph(namesTab, mat->nbCols-4, graph);
-    
-    //CLEANUP
-    deleteDualMatrix(dualMat);
-    deleteMatrix(mat);
-    deleteDualGraph(graph);
-
-    free(namesTab);
-    namesTab = NULL;
-
-    return 0;
 }
+
+
+
+
 

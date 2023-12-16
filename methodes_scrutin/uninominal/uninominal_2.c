@@ -1,4 +1,4 @@
-#include "lecture_csv.h"
+#include "../../lecture_csv/lecture_csv.h"
 #include "uninominal.h"
 #include "uninominal_2.h"
 #include <string.h>

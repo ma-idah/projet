@@ -1,23 +1,9 @@
 #ifndef __CONDORCETBASE__H__
 #define __CONDORCETBASE__H__
 
-#include "../lecture_csv.h"
+#include "../../lecture_csv/lecture_csv.h"
+#include "../../utils_sd/utils_sd.h"
 
-typedef struct s_DualMatrix {
-    int matrix[MAX_ROWS-1][MAX_COLUMNS-4];
-    int nbRows;
-    int nbCols;
-} DualMatrix;
-
-
-/// @brief Crée et alloue de la mémoire pour une matrice de Duels
-/// @param nbRowsCols nombre de lignes/colonnes (= nombre de candiats)
-/// @return pointeur vers matrice de Duels
-DualMatrix *initDualMatrix(int nbRowsCols);
-
-/// @brief supprime la matrice de duels mat et désalloue son pointeur
-/// @param mat matrice de duels à supprimer
-void deleteDualMatrix(DualMatrix *mat);
 
 /// @brief renvoie un entier représentant le résultat du duel entre 2 candidats (pos(+): 1 gagne; neg(-): 2 gagne; 0: égalité)
 ///         place dans tabResult les scores des deux candidats
@@ -39,9 +25,7 @@ void fillDualMatrix(const CsvMatrix *mat, struct s_DualMatrix *dualMat);
 /// @return l'indice du gagant si il y en a un, sinon retourne -1
 int DualMatrixWinner(DualMatrix *dualMat);
 
-/// @brief met en forme et affiche sur stdout la matrice de duels
-/// @param mat matrice de duels
-void printDualMatrix(const DualMatrix *mat);
+
 
 /// @brief Affiche qui est le vainqueur de Condorcet s'il y en a un
 /// @param mat matrice découlant d'un fichier csv

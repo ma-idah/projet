@@ -1,24 +1,13 @@
+#include "../../utils_sd/dualMatrix.h"
 #include "condorcet_base.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 
-DualMatrix *initDualMatrix(int nbRowsCols) {
-    DualMatrix *mat = malloc(sizeof(DualMatrix));
-    if (mat == NULL) {
-        perror("Problème malloc");
-        exit(1);
-    }
-    mat->nbRows = nbRowsCols;
-    mat->nbCols = nbRowsCols;
-    return mat;
-}
 
-void deleteDualMatrix(DualMatrix *mat) {
-    free(mat);
-    mat = NULL;
-}
+
+
 
 //renvoie un entier représentant le résultat du duel (pos(+): 1 gagne; neg(-): 2 gagne; 0: égalité)
 //place dans tabResult les scores des deux candidats
@@ -45,6 +34,10 @@ void fillDualMatrix(const CsvMatrix *mat, struct s_DualMatrix *dualMat) {
     int *tabResult = malloc(sizeof(int)*2);
     int score;
 
+    for (int i=4; i<mat->nbCols; i++) { //remplissage du tableaux des noms
+        strncpy(dualMat->namesTab[i-4], mat->matrix[0][i], MAX_STRING_SIZE);
+    }
+
     for (int i=0; i<nbCandidates; i++) { //pour chaque candidat
         for (int j=i; j<nbCandidates; j++) { //pour chaque adversaire dont on a pas encore simulé le duel
             if (i != j) {
@@ -67,6 +60,8 @@ void fillDualMatrix(const CsvMatrix *mat, struct s_DualMatrix *dualMat) {
     free(tabResult);
 }
 
+
+
 //renvoie l'indice du gagnant, et -1 si pas de gagnant
 int DualMatrixWinner(DualMatrix *dualMat) {
     int victoires;
@@ -88,24 +83,7 @@ int DualMatrixWinner(DualMatrix *dualMat) {
     return -1;
 }
 
-void printDualMatrix(const DualMatrix *mat) {
-    for (int k=0; k<mat->nbCols; k++) {
-            printf("----------------"); 
-        }
-        printf("\n");
 
-    for (int i=0; i<mat->nbRows; i++) {
-        for (int j=0; j<mat->nbCols; j++) {
-            printf("|\t%d\t", mat->matrix[i][j]);
-        }
-        
-        printf("|\n");
-        for (int k=0; k<mat->nbCols; k++) {
-            printf("----------------");
-        }
-        printf("\n");
-    }
-}
 
 int computeCondorcetWinner(CsvMatrix *mat) {
     DualMatrix *dualMat = initDualMatrix(mat->nbCols-4);

@@ -3,7 +3,7 @@
 #ifndef UNINOMINAL_2_H
 #define UNINOMINAL_2_H
 
-#include "lecture_csv.h"
+#include "../../lecture_csv/lecture_csv.h"
 #include "uninominal.h"
 
 // Déclaration de la structure pour stocker les deux indices

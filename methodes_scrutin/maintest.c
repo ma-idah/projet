@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "lecture_csv.h"
-#include "uninominal.h"
-#include "uninominal_2.h"
+#include "../lecture_csv/lecture_csv.h"
+#include "../utils_sd/csvMatrix.h"
+#include "uninominal/uninominal.h"
+#include "uninominal/uninominal_2.h"
 #include <string.h>
 
 

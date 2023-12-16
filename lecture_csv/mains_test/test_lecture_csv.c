@@ -1,4 +1,5 @@
-#include "lecture_csv.h"
+#include "../lecture_csv.h"
+#include "../../utils_sd/csvMatrix.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
